@@ -2,6 +2,7 @@ package com.vaishnavi.backend.controller;
 
 import com.vaishnavi.backend.entity.User;
 import com.vaishnavi.backend.repository.UserRepository;
+import com.vaishnavi.backend.util.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +32,7 @@ public class AuthController {
             return "User already exists";
         }
 
-        String encodedPassword = passwordEncoder.encode(password);
-        User user = new User(email, encodedPassword);
+        User user = new User(email, passwordEncoder.encode(password));
         userRepository.save(user);
 
         return "User registered successfully";
@@ -49,9 +49,9 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new RuntimeException("Invalid password");
         }
 
-        return "Login successful (JWT will come next)";
+        return JwtUtil.generateToken(email);
     }
 }
